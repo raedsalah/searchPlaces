@@ -9,6 +9,8 @@ export interface Place {
 export interface HistoryItem {
   id: string;
   label: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface SearchState {
@@ -140,7 +142,7 @@ const searchSlice = createSlice({
         (item) => item.id !== action.payload
       );
     },
-    clearFav(state, action: PayloadAction<string>) {
+    clearFav(state) {
       state.favList = [];
     },
   },

@@ -43,7 +43,12 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
           .then(({ lat, lng }) => {
             onPlaceSelected(lat, lng, place.label);
             dispatch(
-              addToSearchHistory({ id: place.value, label: place.label })
+              addToSearchHistory({
+                id: place.value,
+                label: place.label,
+                longitude: lng,
+                latitude: lat,
+              })
             );
           })
           .catch((err: string) => {
@@ -54,28 +59,40 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
     );
 
     const dropdownItems: DropdownItem[] = useMemo(() => {
-      if (places.length > 0) {
-        return places.map((place) => {
-          const isFavorite = favList.some(
-            (favItem) => favItem.id === place.place_id
-          );
-          return {
-            label: place.description,
-            value: place.place_id,
-            selectable: true,
-            isFavorite: isFavorite,
-          };
-        });
-      } else if (error) {
-        return [
-          {
-            label: "No results found.",
-            value: "no_result",
-            selectable: false,
-          },
-        ];
+      if (places.length === 0) {
+        if (error) {
+          return [
+            {
+              label: "No results found.",
+              value: "no_result",
+              selectable: false,
+            },
+          ];
+        }
+        return [];
       }
-      return [];
+
+      const favoriteIds = new Set(favList.map((favItem) => favItem.id));
+
+      const favoriteItems: DropdownItem[] = [];
+      const nonFavoriteItems: DropdownItem[] = [];
+
+      places.forEach((place) => {
+        const isFavorite = favoriteIds.has(place.place_id);
+        const item = {
+          label: place.description,
+          value: place.place_id,
+          selectable: true,
+          isFavorite: isFavorite,
+        };
+        if (isFavorite) {
+          favoriteItems.push(item);
+        } else {
+          nonFavoriteItems.push(item);
+        }
+      });
+
+      return [...favoriteItems, ...nonFavoriteItems];
     }, [places, error, favList]);
 
     const handleDropdownSelect = useCallback(
@@ -98,7 +115,21 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
       if (item.isFavorite) {
         dispatch(removeFromFav(item.value));
       } else {
-        dispatch(addToFav({ id: item.value, label: item.label }));
+        dispatch(fetchPlaceDetails(item.value))
+          .unwrap()
+          .then(({ lat, lng }) => {
+            dispatch(
+              addToFav({
+                id: item.value,
+                label: item.label,
+                longitude: lng,
+                latitude: lat,
+              })
+            );
+          })
+          .catch((err: string) => {
+            Alert.alert("Error", err);
+          });
       }
     };
 

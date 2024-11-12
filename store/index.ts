@@ -1,4 +1,3 @@
-// store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import persistedReducer from "./slices";
 import {
@@ -17,7 +16,6 @@ const store = configureStore({
     getDefaultMiddleware({
       thunk: true,
       serializableCheck: {
-        // Ignore redux-persist actions in serializable check
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }),
