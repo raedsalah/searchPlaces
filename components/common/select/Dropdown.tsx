@@ -11,7 +11,7 @@ import { TextInput } from "..";
 import { AntDesign } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 
-interface DropdownItem {
+export interface DropdownItem {
   label: string;
   value: string;
   selectable?: boolean;
