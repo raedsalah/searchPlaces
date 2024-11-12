@@ -11,17 +11,17 @@ import { useSelector } from "react-redux";
 import { ThemedText } from "./ThemedText";
 import { AntDesign } from "@expo/vector-icons";
 
-const SearchHistory: React.FC = () => {
-  const { searchHistory } = useSelector((state: RootState) => state.search);
+const FavList: React.FC = () => {
+  const { favList } = useSelector((state: RootState) => state.search);
 
   const isDark = useColorScheme() === "dark";
   const styles = getStyles(isDark);
 
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.title}>Search History</ThemedText>
+      <ThemedText style={styles.title}>Favorites</ThemedText>
       <View style={{ flex: 1, gap: 8 }}>
-        {searchHistory.map((item, index) => (
+        {favList.map((item, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => console.log("history item=>", item)}
@@ -65,4 +65,4 @@ const getStyles = (isDark: boolean) =>
     },
   });
 
-export default SearchHistory;
+export default FavList;

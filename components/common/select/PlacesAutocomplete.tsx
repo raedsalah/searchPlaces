@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import Dropdown, { DropdownItem } from "./Dropdown";
+import Dropdown from "./Dropdown";
 import debounce from "lodash/debounce";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store";
@@ -8,7 +8,11 @@ import {
   fetchPlaces,
   fetchPlaceDetails,
   addToSearchHistory,
+  addToFav,
+  removeFromFav,
 } from "@/store/slices/searchSlice";
+import { DropdownItem } from "./DropdownItem";
+import { AntDesign } from "@expo/vector-icons";
 
 interface PlacesAutocompleteProps {
   onPlaceSelected: (latitude: number, longitude: number) => void;
@@ -17,7 +21,7 @@ interface PlacesAutocompleteProps {
 const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
   ({ onPlaceSelected }) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { places, loading, error } = useSelector(
+    const { places, loading, error, favList } = useSelector(
       (state: RootState) => state.search
     );
 
@@ -51,11 +55,17 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
 
     const dropdownItems: DropdownItem[] = useMemo(() => {
       if (places.length > 0) {
-        return places.map((place) => ({
-          label: place.description,
-          value: place.place_id,
-          selectable: true,
-        }));
+        return places.map((place) => {
+          const isFavorite = favList.some(
+            (favItem) => favItem.id === place.place_id
+          );
+          return {
+            label: place.description,
+            value: place.place_id,
+            selectable: true,
+            isFavorite: isFavorite,
+          };
+        });
       } else if (error) {
         return [
           {
@@ -66,7 +76,7 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
         ];
       }
       return [];
-    }, [places, error]);
+    }, [places, error, favList]);
 
     const handleDropdownSelect = useCallback(
       (item: DropdownItem) => {
@@ -84,7 +94,13 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
       [debouncedFetchPlaces]
     );
 
-    console.log(dropdownItems);
+    const handlePrefixPress = (item: DropdownItem) => {
+      if (item.isFavorite) {
+        dispatch(removeFromFav(item.value));
+      } else {
+        dispatch(addToFav({ id: item.value, label: item.label }));
+      }
+    };
 
     return (
       <View style={styles.container}>
@@ -94,6 +110,14 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
           placeholder="Search for a place..."
           onSelect={handleDropdownSelect}
           onTextChange={handleSearch}
+          onPrefixPress={handlePrefixPress}
+          prefixComponent={(item) => (
+            <AntDesign
+              name={item.isFavorite ? "star" : "staro"}
+              size={20}
+              color={item.isFavorite ? "gold" : "gray"}
+            />
+          )}
         />
       </View>
     );

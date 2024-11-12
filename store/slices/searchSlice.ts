@@ -16,6 +16,7 @@ interface SearchState {
   places: Place[];
   error: string | null;
   searchHistory: HistoryItem[];
+  favList: HistoryItem[];
 }
 
 const initialState: SearchState = {
@@ -23,6 +24,7 @@ const initialState: SearchState = {
   places: [],
   error: null,
   searchHistory: [],
+  favList: [],
 };
 
 const API_KEY = "AIzaSyAX7glUBU6bLO2UUGYwUxEfeGCEapfJpM0";
@@ -122,6 +124,25 @@ const searchSlice = createSlice({
     clearSearchHistory(state) {
       state.searchHistory = [];
     },
+    addToFav(state, action: PayloadAction<HistoryItem>) {
+      const itemExists = state.favList.some(
+        (item) => item.id === action.payload.id
+      );
+      if (!itemExists) {
+        state.favList.unshift(action.payload);
+        if (state.favList.length > 10) {
+          state.favList.pop();
+        }
+      }
+    },
+    removeFromFav(state, action: PayloadAction<string>) {
+      state.favList = state.favList.filter(
+        (item) => item.id !== action.payload
+      );
+    },
+    clearFav(state, action: PayloadAction<string>) {
+      state.favList = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -164,6 +185,9 @@ export const {
   fetchPlacesFailure,
   addToSearchHistory,
   clearSearchHistory,
+  removeFromFav,
+  addToFav,
+  clearFav,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

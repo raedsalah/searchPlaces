@@ -1,50 +1,49 @@
 import React, { useEffect, useState, memo, useRef, useCallback } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  useColorScheme,
-} from "react-native";
-import { TextInput } from "..";
+import { View, FlatList, StyleSheet, useColorScheme } from "react-native";
+import { TextInput } from "../input";
 import { AntDesign } from "@expo/vector-icons";
-import { ThemedText } from "@/components/ThemedText";
+import DropdownItemComponent, { DropdownItem } from "./DropdownItem";
 
-export interface DropdownItem {
-  label: string;
-  value: string;
-  selectable?: boolean;
-  isFavorite?: boolean;
-}
-
-interface CustomDropdownProps {
+export interface CustomDropdownProps {
   items: DropdownItem[];
   placeholder?: string;
   onSelect: (item: DropdownItem) => void;
   onTextChange?: (query: string) => void;
   loading?: boolean;
+  onPrefixPress?: (item: DropdownItem) => void;
+  onSuffixPress?: (item: DropdownItem) => void;
+  prefixComponent?: (item: DropdownItem) => React.ReactNode;
+  suffixComponent?: (item: DropdownItem) => React.ReactNode;
 }
 
-const CustomDropdown: React.FC<CustomDropdownProps> = ({
+const Dropdown: React.FC<CustomDropdownProps> = ({
   items,
   placeholder = "Select...",
   onSelect,
   onTextChange,
+  onPrefixPress,
+  onSuffixPress,
+  prefixComponent,
+  suffixComponent,
   loading,
 }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredItems, setFilteredItems] = useState<DropdownItem[]>(items);
-  const [selectedLabel, setSelectedLabel] = useState("");
   const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const colorScheme = useColorScheme();
-  const styles = getStyles(colorScheme === "dark");
+  const isDark = colorScheme === "dark";
+  const styles = getStyles(isDark);
 
   useEffect(() => {
-    if (!searchQuery) {
+    if (searchQuery === "") {
       setFilteredItems(items);
+    } else {
+      const filtered = items.filter((item) =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredItems(filtered);
     }
   }, [items, searchQuery]);
 
@@ -76,14 +75,11 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
   const handleSelectItem = (item: DropdownItem) => {
     if (item.selectable) {
-      setSelectedLabel(item.label);
       onSelect(item);
       setIsDropdownVisible(false);
       setSearchQuery(item.label);
     }
   };
-
-  console.log("--------", items);
 
   return (
     <View style={styles.container}>
@@ -103,32 +99,15 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
             data={filteredItems}
             keyExtractor={(item) => item.value.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => handleSelectItem(item)}
-                style={styles.itemWrapper}
-              >
-                {item.selectable && (
-                  <TouchableOpacity
-                    onPress={() => console.log("pressed")}
-                    style={styles.starContainer}
-                  >
-                    <AntDesign
-                      name={item.isFavorite ? "star" : "staro"}
-                      size={20}
-                      color={item.isFavorite ? "gold" : "gray"}
-                    />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  onPress={() => handleSelectItem(item)}
-                  style={[styles.itemContainer]}
-                  disabled={!item.selectable}
-                >
-                  <ThemedText style={[!item.selectable && styles.centeredText]}>
-                    {item.label}
-                  </ThemedText>
-                </TouchableOpacity>
-              </TouchableOpacity>
+              <DropdownItemComponent
+                item={item}
+                onSelect={handleSelectItem}
+                onPrefixPress={onPrefixPress}
+                onSuffixPress={onSuffixPress}
+                prefixComponent={prefixComponent}
+                suffixComponent={suffixComponent}
+                isDark={isDark}
+              />
             )}
             keyboardShouldPersistTaps="handled"
           />
@@ -158,25 +137,10 @@ const getStyles = (isDark: boolean) =>
       borderRadius: 8,
       borderWidth: 1,
       borderColor: isDark ? "#2f2f2f" : "#d1d1d1",
-      maxHeight: 150,
+      maxHeight: 200,
       zIndex: 100,
       elevation: 100,
     },
-    itemWrapper: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    itemContainer: {
-      paddingVertical: 12,
-      paddingHorizontal: 8,
-    },
-    starContainer: {
-      paddingLeft: 12,
-    },
-    centeredText: {
-      textAlign: "center",
-      color: "gray",
-    },
   });
 
-export default memo(CustomDropdown);
+export default memo(Dropdown);

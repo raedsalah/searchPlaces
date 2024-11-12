@@ -1,6 +1,7 @@
+import FavList from "@/components/FavList";
 import SearchHistory from "@/components/SearchHistory";
 import { ThemedView } from "@/components/ThemedView";
-import { StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
 export default function HistoryScreen() {
   return (
@@ -10,7 +11,10 @@ export default function HistoryScreen() {
       isSafeArea
       style={styles.container}
     >
-      <SearchHistory />
+      <ScrollView>
+        <SearchHistory />
+        <FavList />
+      </ScrollView>
     </ThemedView>
   );
 }
