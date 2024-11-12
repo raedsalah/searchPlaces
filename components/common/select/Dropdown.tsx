@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, memo, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -37,6 +37,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredItems, setFilteredItems] = useState<DropdownItem[]>(items);
   const [selectedLabel, setSelectedLabel] = useState("");
+  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const colorScheme = useColorScheme();
   const styles = getStyles(colorScheme === "dark");
@@ -52,13 +53,23 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     }
   }, [items, searchQuery]);
 
-  const handleFocus = () => {
+  const handleFocus = useCallback(() => {
     setIsDropdownVisible(true);
-  };
+  }, []);
 
-  const handleBlur = () => {
-    setTimeout(() => setIsDropdownVisible(false), 100);
-  };
+  const handleBlur = useCallback(() => {
+    blurTimeoutRef.current = setTimeout(() => {
+      setIsDropdownVisible(false);
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
