@@ -59,10 +59,7 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
       } else if (error) {
         return [
           {
-            label:
-              error === "No results found."
-                ? "No results found."
-                : "Error fetching results.",
+            label: "No results found.",
             value: "no_result",
             selectable: false,
           },

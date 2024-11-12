@@ -38,8 +38,6 @@ export default function HomeScreen() {
 
       <PlacesAutocomplete onPlaceSelected={handlePlaceSelected} />
 
-      <SearchHistory />
-
       <MapView
         style={styles.map}
         initialRegion={{

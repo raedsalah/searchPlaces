@@ -45,11 +45,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   useEffect(() => {
     if (!searchQuery) {
       setFilteredItems(items);
-    } else {
-      const filtered = items.filter((item) =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredItems(filtered);
     }
   }, [items, searchQuery]);
 
@@ -75,11 +70,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     setSearchQuery(query);
     if (onTextChange) {
       onTextChange(query);
-    } else {
-      const filtered = items.filter((item) =>
-        item.label.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredItems(filtered);
     }
     setIsDropdownVisible(true);
   };
@@ -92,6 +82,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       setSearchQuery(item.label);
     }
   };
+
+  console.log("--------", items);
 
   return (
     <View style={styles.container}>
@@ -129,10 +121,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 )}
                 <TouchableOpacity
                   onPress={() => handleSelectItem(item)}
-                  style={[
-                    styles.itemContainer,
-                    !item.selectable && styles.nonSelectableItem,
-                  ]}
+                  style={[styles.itemContainer]}
                   disabled={!item.selectable}
                 >
                   <ThemedText style={[!item.selectable && styles.centeredText]}>
@@ -187,9 +176,6 @@ const getStyles = (isDark: boolean) =>
     centeredText: {
       textAlign: "center",
       color: "gray",
-    },
-    nonSelectableItem: {
-      backgroundColor: "transparent",
     },
   });
 
