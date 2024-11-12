@@ -37,14 +37,7 @@ const Dropdown: React.FC<CustomDropdownProps> = ({
   const styles = getStyles(isDark);
 
   useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredItems(items);
-    } else {
-      const filtered = items.filter((item) =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredItems(filtered);
-    }
+    setFilteredItems(items);
   }, [items, searchQuery]);
 
   const handleFocus = useCallback(() => {
@@ -98,17 +91,20 @@ const Dropdown: React.FC<CustomDropdownProps> = ({
           <FlatList
             data={filteredItems}
             keyExtractor={(item) => item.value.toString()}
-            renderItem={({ item }) => (
-              <DropdownItemComponent
-                item={item}
-                onSelect={handleSelectItem}
-                onPrefixPress={onPrefixPress}
-                onSuffixPress={onSuffixPress}
-                prefixComponent={prefixComponent}
-                suffixComponent={suffixComponent}
-                isDark={isDark}
-              />
-            )}
+            renderItem={({ item }) => {
+              console.log("should render");
+              return (
+                <DropdownItemComponent
+                  item={item}
+                  onSelect={handleSelectItem}
+                  onPrefixPress={onPrefixPress}
+                  onSuffixPress={onSuffixPress}
+                  prefixComponent={prefixComponent}
+                  suffixComponent={suffixComponent}
+                  isDark={isDark}
+                />
+              );
+            }}
             keyboardShouldPersistTaps="handled"
           />
         </View>

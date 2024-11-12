@@ -3,16 +3,18 @@ import { View, StyleSheet, Alert } from "react-native";
 import Dropdown from "./Dropdown";
 import debounce from "lodash/debounce";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@/store";
 import {
-  fetchPlaces,
-  fetchPlaceDetails,
+  fetchPlacesRequest,
+  fetchPlaceDetailsRequest,
   addToSearchHistory,
   addToFav,
   removeFromFav,
+  clearSelectedPlaceDetails,
+  clearError,
 } from "@/store/slices/searchSlice";
 import { DropdownItem } from "./DropdownItem";
 import { AntDesign } from "@expo/vector-icons";
+import { RootState } from "@/store/slices";
 
 interface PlacesAutocompleteProps {
   onPlaceSelected: (latitude: number, longitude: number, label: string) => void;
@@ -20,13 +22,24 @@ interface PlacesAutocompleteProps {
 
 const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
   ({ onPlaceSelected }) => {
-    const dispatch = useDispatch<AppDispatch>();
-    const { places, loading, error, favList } = useSelector(
-      (state: RootState) => state.search
+    const dispatch = useDispatch();
+    const { places, loading, error, favList, selectedPlaceDetails } =
+      useSelector((state: RootState) => state.search);
+
+    const [selectedPlace, setSelectedPlace] = useState<DropdownItem | null>(
+      null
     );
+    const [pendingAction, setPendingAction] = useState<
+      "select" | "favorite" | null
+    >(null);
 
     const debouncedFetchPlaces = useMemo(
-      () => debounce((query: string) => dispatch(fetchPlaces(query)), 500),
+      () =>
+        debounce((query: string) => {
+          if (query.length > 0) {
+            dispatch(fetchPlacesRequest(query));
+          }
+        }, 500),
       [dispatch]
     );
 
@@ -36,40 +49,83 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
       };
     }, [debouncedFetchPlaces]);
 
+    useEffect(() => {
+      if (error) {
+        Alert.alert("Error", error);
+        dispatch(clearError());
+        setPendingAction(null);
+        setSelectedPlace(null);
+      }
+    }, [error, dispatch]);
+
+    useEffect(() => {
+      if (selectedPlace && selectedPlaceDetails && pendingAction) {
+        const { lat, lng } = selectedPlaceDetails;
+
+        if (pendingAction === "select") {
+          onPlaceSelected(lat, lng, selectedPlace.label);
+          dispatch(
+            addToSearchHistory({
+              id: selectedPlace.value,
+              label: selectedPlace.label,
+              longitude: lng,
+              latitude: lat,
+            })
+          );
+        } else if (pendingAction === "favorite") {
+          dispatch(
+            addToFav({
+              id: selectedPlace.value,
+              label: selectedPlace.label,
+              longitude: lng,
+              latitude: lat,
+            })
+          );
+        }
+
+        setSelectedPlace(null);
+        setPendingAction(null);
+        dispatch(clearSelectedPlaceDetails());
+      }
+    }, [
+      selectedPlace,
+      selectedPlaceDetails,
+      pendingAction,
+      onPlaceSelected,
+      dispatch,
+    ]);
+
     const handleSelectPlace = useCallback(
-      async (place: DropdownItem) => {
-        dispatch(fetchPlaceDetails(place.value))
-          .unwrap()
-          .then(({ lat, lng }) => {
-            onPlaceSelected(lat, lng, place.label);
-            dispatch(
-              addToSearchHistory({
-                id: place.value,
-                label: place.label,
-                longitude: lng,
-                latitude: lat,
-              })
-            );
-          })
-          .catch((err: string) => {
-            Alert.alert("Error", err);
-          });
+      (place: DropdownItem) => {
+        setSelectedPlace(place);
+        setPendingAction("select");
+        dispatch(fetchPlaceDetailsRequest(place.value));
       },
-      [dispatch, onPlaceSelected]
+      [dispatch]
+    );
+
+    const handlePrefixPress = useCallback(
+      (item: DropdownItem) => {
+        if (item.isFavorite) {
+          dispatch(removeFromFav(item.value));
+        } else {
+          setSelectedPlace(item);
+          setPendingAction("favorite");
+          dispatch(fetchPlaceDetailsRequest(item.value));
+        }
+      },
+      [dispatch]
     );
 
     const dropdownItems: DropdownItem[] = useMemo(() => {
       if (places.length === 0) {
-        if (error) {
-          return [
-            {
-              label: "No results found.",
-              value: "no_result",
-              selectable: false,
-            },
-          ];
-        }
-        return [];
+        return [
+          {
+            label: "No results found.",
+            value: "no_result",
+            selectable: false,
+          },
+        ];
       }
 
       const favoriteIds = new Set(favList.map((favItem) => favItem.id));
@@ -79,7 +135,7 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
 
       places.forEach((place) => {
         const isFavorite = favoriteIds.has(place.place_id);
-        const item = {
+        const item: DropdownItem = {
           label: place.description,
           value: place.place_id,
           selectable: true,
@@ -93,7 +149,7 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
       });
 
       return [...favoriteItems, ...nonFavoriteItems];
-    }, [places, error, favList]);
+    }, [places, error, favList, loading]);
 
     const handleDropdownSelect = useCallback(
       (item: DropdownItem) => {
@@ -110,28 +166,6 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
       },
       [debouncedFetchPlaces]
     );
-
-    const handlePrefixPress = (item: DropdownItem) => {
-      if (item.isFavorite) {
-        dispatch(removeFromFav(item.value));
-      } else {
-        dispatch(fetchPlaceDetails(item.value))
-          .unwrap()
-          .then(({ lat, lng }) => {
-            dispatch(
-              addToFav({
-                id: item.value,
-                label: item.label,
-                longitude: lng,
-                latitude: lat,
-              })
-            );
-          })
-          .catch((err: string) => {
-            Alert.alert("Error", err);
-          });
-      }
-    };
 
     return (
       <View style={styles.container}>

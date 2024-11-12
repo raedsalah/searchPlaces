@@ -9,11 +9,12 @@ import {
   Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store";
+import { AppDispatch } from "@/store";
 import { ThemedText } from "./ThemedText";
 import { AntDesign } from "@expo/vector-icons";
 import MapView, { Marker } from "react-native-maps";
 import { clearSearchHistory, HistoryItem } from "@/store/slices/searchSlice";
+import { RootState } from "@/store/slices";
 
 const SearchHistory: React.FC = () => {
   const { searchHistory } = useSelector((state: RootState) => state.search);

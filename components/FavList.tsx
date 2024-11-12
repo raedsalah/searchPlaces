@@ -1,4 +1,4 @@
-import { AppDispatch, RootState } from "@/store";
+import { AppDispatch } from "@/store";
 import React, { useState } from "react";
 import {
   View,
@@ -18,6 +18,7 @@ import {
   removeFromFav,
 } from "@/store/slices/searchSlice";
 import MapView, { Marker } from "react-native-maps";
+import { RootState } from "@/store/slices";
 
 const FavList: React.FC = () => {
   const { favList } = useSelector((state: RootState) => state.search);
