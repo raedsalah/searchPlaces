@@ -8,10 +8,14 @@ import {
   useColorScheme,
 } from "react-native";
 import { TextInput } from "..";
+import { AntDesign } from "@expo/vector-icons";
+import { ThemedText } from "@/components/ThemedText";
 
 interface DropdownItem {
   label: string;
   value: string;
+  selectable?: boolean;
+  isFavorite?: boolean;
 }
 
 interface CustomDropdownProps {
@@ -91,9 +95,32 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => handleSelectItem(item)}
-                style={styles.itemContainer}
+                style={styles.itemWrapper}
               >
-                <Text style={styles.itemText}>{item.label}</Text>
+                {item.selectable && (
+                  <TouchableOpacity
+                    onPress={() => console.log("pressed")}
+                    style={styles.starContainer}
+                  >
+                    <AntDesign
+                      name={item.isFavorite ? "star" : "staro"}
+                      size={20}
+                      color={item.isFavorite ? "gold" : "gray"}
+                    />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  onPress={() => handleSelectItem(item)}
+                  style={[
+                    styles.itemContainer,
+                    !item.selectable && styles.nonSelectableItem,
+                  ]}
+                  disabled={!item.selectable}
+                >
+                  <ThemedText style={[!item.selectable && styles.centeredText]}>
+                    {item.label}
+                  </ThemedText>
+                </TouchableOpacity>
               </TouchableOpacity>
             )}
             keyboardShouldPersistTaps="handled"
@@ -128,13 +155,23 @@ const getStyles = (isDark: boolean) =>
       zIndex: 100,
       elevation: 100,
     },
-    itemContainer: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
+    itemWrapper: {
+      flexDirection: "row",
+      alignItems: "center",
     },
-    itemText: {
-      fontSize: 16,
-      color: isDark ? "#fff" : "#333",
+    itemContainer: {
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+    },
+    starContainer: {
+      paddingLeft: 12,
+    },
+    centeredText: {
+      textAlign: "center",
+      color: "gray",
+    },
+    nonSelectableItem: {
+      backgroundColor: "transparent",
     },
   });
 
