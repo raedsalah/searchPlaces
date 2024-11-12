@@ -1,11 +1,12 @@
 import { Dropdown, TextInput } from "@/components/common";
+import PlacesAutocomplete from "@/components/common/select/PlacesAutocomplete";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useState } from "react";
 import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
-const dropdownItems = [
+export const dropdownItems = [
   { label: "Option 1", value: "1" },
   { label: "Option 2", value: "2" },
   { label: "Option 3", value: "3" },
@@ -43,6 +44,11 @@ export default function HomeScreen() {
       />
 
       <Dropdown items={dropdownItems} onSelect={handleSelect} />
+      <PlacesAutocomplete
+        onPlaceSelected={(lat, long) => {
+          console.log("lat => ", lat, "\nlong => ", long);
+        }}
+      />
 
       <MapView
         style={styles.map}

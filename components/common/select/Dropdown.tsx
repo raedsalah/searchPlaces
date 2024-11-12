@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import {
   View,
   Text,
@@ -18,34 +18,50 @@ interface CustomDropdownProps {
   items: DropdownItem[];
   placeholder?: string;
   onSelect: (value: string) => void;
+  onTextChange?: (query: string) => void;
+  loading?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
   items,
   placeholder = "Select...",
   onSelect,
+  onTextChange,
+  loading,
 }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredItems, setFilteredItems] = useState(items);
+  const [filteredItems, setFilteredItems] = useState<DropdownItem[]>(items);
   const [selectedLabel, setSelectedLabel] = useState("");
 
-  const styles = getStyles(useColorScheme() === "dark");
+  const colorScheme = useColorScheme();
+  const styles = getStyles(colorScheme === "dark");
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilteredItems(items);
+    } else {
+      const filtered = items.filter((item) =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredItems(filtered);
+    }
+  }, [items, searchQuery]);
 
   const handleFocus = () => {
     setIsDropdownVisible(true);
   };
 
   const handleBlur = () => {
-    setIsDropdownVisible(false);
+    setTimeout(() => setIsDropdownVisible(false), 100);
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = items.filter((item) =>
-      item.label.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredItems(filtered);
+    if (onTextChange) {
+      onTextChange(query);
+    }
+    setIsDropdownVisible(true);
   };
 
   const handleSelectItem = (item: DropdownItem) => {
@@ -65,6 +81,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
         onBlur={handleBlur}
         onChangeText={handleSearch}
         withClearInput
+        loading={loading}
       />
       {isDropdownVisible && filteredItems.length > 0 && (
         <View style={styles.dropdownContainer}>
@@ -79,6 +96,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 <Text style={styles.itemText}>{item.label}</Text>
               </TouchableOpacity>
             )}
+            keyboardShouldPersistTaps="handled"
           />
         </View>
       )}
@@ -120,4 +138,4 @@ const getStyles = (isDark: boolean) =>
     },
   });
 
-export default CustomDropdown;
+export default memo(CustomDropdown);
