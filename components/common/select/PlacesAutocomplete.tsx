@@ -33,12 +33,14 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
     }, [debouncedFetchPlaces]);
 
     const handleSelectPlace = useCallback(
-      async (place_id: string) => {
-        dispatch(fetchPlaceDetails(place_id))
+      async (place: DropdownItem) => {
+        dispatch(fetchPlaceDetails(place.value))
           .unwrap()
           .then(({ lat, lng }) => {
             onPlaceSelected(lat, lng);
-            dispatch(addToSearchHistory(place_id));
+            dispatch(
+              addToSearchHistory({ id: place.value, label: place.label })
+            );
           })
           .catch((err: string) => {
             Alert.alert("Error", err);
@@ -70,9 +72,9 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
     }, [places, error]);
 
     const handleDropdownSelect = useCallback(
-      (place_id: string) => {
-        if (place_id !== "no_result") {
-          handleSelectPlace(place_id);
+      (item: DropdownItem) => {
+        if (item.value !== "no_result") {
+          handleSelectPlace(item);
         }
       },
       [handleSelectPlace]

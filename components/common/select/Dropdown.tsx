@@ -21,7 +21,7 @@ export interface DropdownItem {
 interface CustomDropdownProps {
   items: DropdownItem[];
   placeholder?: string;
-  onSelect: (value: string) => void;
+  onSelect: (item: DropdownItem) => void;
   onTextChange?: (query: string) => void;
   loading?: boolean;
 }
@@ -87,7 +87,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const handleSelectItem = (item: DropdownItem) => {
     if (item.selectable) {
       setSelectedLabel(item.label);
-      onSelect(item.value);
+      onSelect(item);
       setIsDropdownVisible(false);
       setSearchQuery(item.label);
     }

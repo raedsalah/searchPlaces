@@ -6,11 +6,16 @@ export interface Place {
   place_id: string;
 }
 
+export interface HistoryItem {
+  id: string;
+  label: string;
+}
+
 interface SearchState {
   loading: boolean;
   places: Place[];
   error: string | null;
-  searchHistory: string[];
+  searchHistory: HistoryItem[];
 }
 
 const initialState: SearchState = {
@@ -108,7 +113,7 @@ const searchSlice = createSlice({
       state.places = [];
       state.error = action.payload;
     },
-    addToSearchHistory(state, action: PayloadAction<string>) {
+    addToSearchHistory(state, action: PayloadAction<HistoryItem>) {
       state.searchHistory.unshift(action.payload);
       if (state.searchHistory.length > 10) {
         state.searchHistory.pop();

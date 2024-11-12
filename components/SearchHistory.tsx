@@ -23,7 +23,7 @@ const SearchHistory: React.FC = () => {
           key={index}
           onPress={() => console.log("history item=>", item)}
         >
-          <ThemedText style={styles.item}>{item}</ThemedText>
+          <ThemedText style={styles.item}>{item.label}</ThemedText>
         </TouchableOpacity>
       ))}
     </View>
