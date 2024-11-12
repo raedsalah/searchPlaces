@@ -1,6 +1,4 @@
-import { Dropdown, TextInput } from "@/components/common";
 import PlacesAutocomplete from "@/components/common/select/PlacesAutocomplete";
-import SearchHistory from "@/components/SearchHistory";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useState } from "react";
@@ -9,16 +7,25 @@ import MapView, { LatLng, Marker, Region } from "react-native-maps";
 
 export default function HomeScreen() {
   const [region, setRegion] = useState<Region>();
-  const [marker, setMarker] = useState<LatLng>();
+  const [marker, setMarker] = useState<(LatLng & { label: string }) | null>(
+    null
+  );
 
-  const handlePlaceSelected = (latitude: number, longitude: number) => {
+  const handlePlaceSelected = (
+    latitude: number,
+    longitude: number,
+    label: string
+  ) => {
+    setMarker(null);
     setRegion({
       latitude,
       longitude,
       latitudeDelta: 0.1,
       longitudeDelta: 0.1,
     });
-    setMarker({ latitude, longitude });
+    setMarker({ latitude, longitude, label });
+
+    console.log(label);
   };
 
   return (
@@ -48,13 +55,7 @@ export default function HomeScreen() {
         }}
         region={region}
       >
-        {marker && (
-          <Marker
-            coordinate={marker}
-            title="San Francisco" //TODO
-            description="This is a marker in San Francisco" //TODO
-          />
-        )}
+        {marker && <Marker coordinate={marker} title={marker.label} />}
       </MapView>
     </ThemedView>
   );

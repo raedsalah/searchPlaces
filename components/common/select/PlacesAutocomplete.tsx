@@ -15,7 +15,7 @@ import { DropdownItem } from "./DropdownItem";
 import { AntDesign } from "@expo/vector-icons";
 
 interface PlacesAutocompleteProps {
-  onPlaceSelected: (latitude: number, longitude: number) => void;
+  onPlaceSelected: (latitude: number, longitude: number, label: string) => void;
 }
 
 const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
@@ -41,7 +41,7 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
         dispatch(fetchPlaceDetails(place.value))
           .unwrap()
           .then(({ lat, lng }) => {
-            onPlaceSelected(lat, lng);
+            onPlaceSelected(lat, lng, place.label);
             dispatch(
               addToSearchHistory({ id: place.value, label: place.label })
             );
