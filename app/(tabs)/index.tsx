@@ -4,22 +4,20 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useState } from "react";
 import { StyleSheet } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-
-export const dropdownItems = [
-  { label: "Option 1", value: "1" },
-  { label: "Option 2", value: "2" },
-  { label: "Option 3", value: "3" },
-];
+import MapView, { LatLng, Marker, Region } from "react-native-maps";
 
 export default function HomeScreen() {
-  const [val, setVal] = useState<string>("");
+  const [region, setRegion] = useState<Region>();
+  const [marker, setMarker] = useState<LatLng>();
 
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-
-  const handleSelect = (value: string) => {
-    setSelectedItem(value);
-    console.log(value);
+  const handlePlaceSelected = (latitude: number, longitude: number) => {
+    setRegion({
+      latitude,
+      longitude,
+      latitudeDelta: 0.1,
+      longitudeDelta: 0.1,
+    });
+    setMarker({ latitude, longitude });
   };
 
   return (
@@ -37,33 +35,25 @@ export default function HomeScreen() {
         location will display on the map below.
       </ThemedText>
 
-      <TextInput
-        withClearInput
-        value={val}
-        onChangeText={(value) => setVal(value)}
-      />
-
-      <Dropdown items={dropdownItems} onSelect={handleSelect} />
-      <PlacesAutocomplete
-        onPlaceSelected={(lat, long) => {
-          console.log("lat => ", lat, "\nlong => ", long);
-        }}
-      />
+      <PlacesAutocomplete onPlaceSelected={handlePlaceSelected} />
 
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 37.7749,
-          longitude: -122.4194,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitude: 4.2105, // center of my
+          longitude: 101.9758,
+          latitudeDelta: 4.5,
+          longitudeDelta: 4.5,
         }}
+        region={region}
       >
-        <Marker
-          coordinate={{ latitude: 37.7749, longitude: -122.4194 }}
-          title="San Francisco"
-          description="This is a marker in San Francisco"
-        />
+        {marker && (
+          <Marker
+            coordinate={marker}
+            title="San Francisco" //TODO
+            description="This is a marker in San Francisco" //TODO
+          />
+        )}
       </MapView>
     </ThemedView>
   );
