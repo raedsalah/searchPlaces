@@ -1,12 +1,26 @@
-import { TextInput } from "@/components/common";
+import { Dropdown, TextInput } from "@/components/common";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useState } from "react";
 import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
+const dropdownItems = [
+  { label: "Option 1", value: "1" },
+  { label: "Option 2", value: "2" },
+  { label: "Option 3", value: "3" },
+];
+
 export default function HomeScreen() {
   const [val, setVal] = useState<string>("");
+
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+
+  const handleSelect = (value: string) => {
+    setSelectedItem(value);
+    console.log(value);
+  };
+
   return (
     <ThemedView
       edges={["left", "top", "right"]}
@@ -27,6 +41,8 @@ export default function HomeScreen() {
         value={val}
         onChangeText={(value) => setVal(value)}
       />
+
+      <Dropdown items={dropdownItems} onSelect={handleSelect} />
 
       <MapView
         style={styles.map}
