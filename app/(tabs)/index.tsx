@@ -2,7 +2,8 @@ import { TextInput } from "@/components/common";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 export default function HomeScreen() {
   const [val, setVal] = useState<string>("");
@@ -26,6 +27,22 @@ export default function HomeScreen() {
         value={val}
         onChangeText={(value) => setVal(value)}
       />
+
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 37.7749,
+          longitude: -122.4194,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+      >
+        <Marker
+          coordinate={{ latitude: 37.7749, longitude: -122.4194 }}
+          title="San Francisco"
+          description="This is a marker in San Francisco"
+        />
+      </MapView>
     </ThemedView>
   );
 }
@@ -33,6 +50,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 12,
   },
-  input: {},
+  map: {
+    flex: 1,
+    marginTop: 20,
+    borderRadius: 8,
+  },
 });
