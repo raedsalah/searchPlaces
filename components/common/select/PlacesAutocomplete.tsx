@@ -1,14 +1,13 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { View, StyleSheet, Alert } from "react-native";
 import Dropdown, { DropdownItem } from "./Dropdown";
-import axios from "axios";
 import debounce from "lodash/debounce";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store";
 import {
   fetchPlaces,
   fetchPlaceDetails,
-  Place,
+  addToSearchHistory,
 } from "@/store/slices/searchSlice";
 
 interface PlacesAutocompleteProps {
@@ -39,6 +38,7 @@ const PlacesAutocomplete: React.FC<PlacesAutocompleteProps> = React.memo(
           .unwrap()
           .then(({ lat, lng }) => {
             onPlaceSelected(lat, lng);
+            dispatch(addToSearchHistory(place_id));
           })
           .catch((err: string) => {
             Alert.alert("Error", err);

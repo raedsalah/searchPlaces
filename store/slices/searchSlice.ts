@@ -10,12 +10,14 @@ interface SearchState {
   loading: boolean;
   places: Place[];
   error: string | null;
+  searchHistory: string[];
 }
 
 const initialState: SearchState = {
   loading: false,
   places: [],
   error: null,
+  searchHistory: [],
 };
 
 const API_KEY = "AIzaSyAX7glUBU6bLO2UUGYwUxEfeGCEapfJpM0";
@@ -106,6 +108,15 @@ const searchSlice = createSlice({
       state.places = [];
       state.error = action.payload;
     },
+    addToSearchHistory(state, action: PayloadAction<string>) {
+      state.searchHistory.unshift(action.payload);
+      if (state.searchHistory.length > 10) {
+        state.searchHistory.pop();
+      }
+    },
+    clearSearchHistory(state) {
+      state.searchHistory = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -142,7 +153,12 @@ const searchSlice = createSlice({
   },
 });
 
-export const { fetchPlacesRequest, fetchPlacesSuccess, fetchPlacesFailure } =
-  searchSlice.actions;
+export const {
+  fetchPlacesRequest,
+  fetchPlacesSuccess,
+  fetchPlacesFailure,
+  addToSearchHistory,
+  clearSearchHistory,
+} = searchSlice.actions;
 
 export default searchSlice.reducer;

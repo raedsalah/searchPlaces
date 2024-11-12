@@ -1,5 +1,6 @@
 import { Dropdown, TextInput } from "@/components/common";
 import PlacesAutocomplete from "@/components/common/select/PlacesAutocomplete";
+import SearchHistory from "@/components/SearchHistory";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useState } from "react";
@@ -36,6 +37,8 @@ export default function HomeScreen() {
       </ThemedText>
 
       <PlacesAutocomplete onPlaceSelected={handlePlaceSelected} />
+
+      <SearchHistory />
 
       <MapView
         style={styles.map}
