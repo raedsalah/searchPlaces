@@ -75,15 +75,22 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     setSearchQuery(query);
     if (onTextChange) {
       onTextChange(query);
+    } else {
+      const filtered = items.filter((item) =>
+        item.label.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredItems(filtered);
     }
     setIsDropdownVisible(true);
   };
 
   const handleSelectItem = (item: DropdownItem) => {
-    setSelectedLabel(item.label);
-    onSelect(item.value);
-    setIsDropdownVisible(false);
-    setSearchQuery(item.label);
+    if (item.selectable) {
+      setSelectedLabel(item.label);
+      onSelect(item.value);
+      setIsDropdownVisible(false);
+      setSearchQuery(item.label);
+    }
   };
 
   return (
